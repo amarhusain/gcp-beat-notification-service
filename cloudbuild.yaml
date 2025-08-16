@@ -1,6 +1,6 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
 steps:
-  - options:
-      logging: CLOUD_LOGGING_ONLY
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'asia-east1-docker.pkg.dev/$PROJECT_ID/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA', '.']
