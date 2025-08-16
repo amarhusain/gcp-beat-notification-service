@@ -66,7 +66,7 @@ public class JavaMailEmailSender implements IEmailSender {
             CreateEmailResponse response = resendClient.emails().send(sendEmailOptions);
 
             // Optional: Log the email ID for tracking
-            System.out.println("Email sent successfully by Resend. ID: " + response.getId());
+            System.out.println("Email sent successfully by Resend ID: " + response.getId());
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to send email using Resend", e);
