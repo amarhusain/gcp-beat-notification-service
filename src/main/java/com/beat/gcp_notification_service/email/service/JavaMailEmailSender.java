@@ -69,7 +69,7 @@ public class JavaMailEmailSender implements IEmailSender {
             System.out.println("Email sent successfully by Resend ID: " + response.getId());
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to send email using 1 Resend", e);
+            throw new RuntimeException("Failed to send email using 2 Resend", e);
         }
     }
 
