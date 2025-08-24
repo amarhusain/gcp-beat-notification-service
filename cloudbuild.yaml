@@ -4,12 +4,33 @@ steps:
   # Step 1: Build the Java application using Maven
   - name: 'maven:3.9.9-eclipse-temurin-21'
     entrypoint: 'mvn'
-    args: ['package']
+    args: [ 'package', '-DskipTests' ]
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-east1-docker.pkg.dev/$PROJECT_ID/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA', '.']
+    args: [ 'build', '-t', 'asia-east1-docker.pkg.dev/$PROJECT_ID/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA', '.' ]
   # Step 2: Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-east1-docker.pkg.dev/$PROJECT_ID/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA']
+    args: [ 'push', 'asia-east1-docker.pkg.dev/$PROJECT_ID/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA' ]
+
+  # Step 4: Substitute variables in deployment.yaml
+  - name: 'alpine'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        apk add --no-cache gettext
+        export PROJECT_ID=$PROJECT_ID
+        export COMMIT_SHA=$COMMIT_SHA
+        envsubst < deployment.yaml > deployment-resolved.yaml
+
+  # Step 5: Deploy the image to GKE
+  - name: 'gcr.io/cloud-builders/gke-deploy'
+    args:
+      - 'run'
+      - '--filename=deployment-resolved.yaml'
+      - '--image=asia-east1-docker.pkg.dev/$PROJECT_ID/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA'
+      - '--location=asia-east1' # Replace with your cluster's zone
+      - '--cluster=gcp-beat-autopilot-cluster' # Replace with your GKE cluster name
+
 images:
   - 'asia-east1-docker.pkg.dev/$PROJECT_ID/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA'

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-beat-notification-service
+spec:
+  replicas: 1 # You can adjust this to scale your application
+  selector:
+    matchLabels:
+      app: gcp-beat-notification-service
+  template:
+    metadata:
+      labels:
+        app: gcp-beat-notification-service
+    spec:
+      containers:
+        # Your backend application container
+        - name: gcp-beat-notification-service
+          image: asia-east1-docker.pkg.dev/beat-test-468617/gcp-beat-notification-artifact-repo/gcp-beat-notification-service-image:$COMMIT_SHA
+          ports:
+            - containerPort: 8083 # The port your Spring Boot app is listening on
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: GCP_PROJECT_ID
+              value: beat-test-468617
+            - name: PUBSUB_SUBSCRIPTION
+              value: gcp-beat-email-pubsub-subscription
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gcp-beat-notification-service
+spec:
+  type: LoadBalancer # Creates a public IP address to access your app
+  selector:
+    app: gcp-beat-notification-service
+  ports:
+    - protocol: TCP
+      port: 80 # External port for the load balancer
+      targetPort: 8083 # Internal port of the container
